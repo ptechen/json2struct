@@ -17,6 +17,9 @@ struct Cli {
     /// 是否添加 omitempty, example: json2struct '{"test":"test"}' -o false
     #[structopt(default_value = "true", short)]
     omitempty: String,
+    /// 指定结构体名字, example: json2struct '{"test":"test"}' -s TTTT
+    #[structopt(default_value = "XXX", short)]
+    struct_name:String,
 }
 
 fn main() -> CliResult {
@@ -26,7 +29,7 @@ fn main() -> CliResult {
     if omit != "true" {
         set_omitempty_empty()
     }
-    let res = golang_parse(&params, &"XXX".to_string());
+    let res = golang_parse(&params, &args.struct_name);
     println!("{}", res);
     Ok(())
 }
