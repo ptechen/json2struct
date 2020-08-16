@@ -1,0 +1,1 @@
+pub mod json2struct2golang;
