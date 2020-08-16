@@ -4,7 +4,10 @@ Install:
 
     cargo install json2struct
 
+Json 2 Struct
+
 USAGE:
+
     json2struct [OPTIONS] <json>
 
 FLAGS:
@@ -14,8 +17,9 @@ FLAGS:
 
 OPTIONS:
 
-    -o <omitempty>        是否添加 omitempty [default: true]
+    -o <omitempty>        是否添加 omitempty, example: json2struct '{"test":"test"}' -o false [default: true]
 
 ARGS:
 
-    <json>    Input a json
+    <json>    Input a json string, example: json2struct '{"test":"test"}'
+
