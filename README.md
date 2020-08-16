@@ -1,4 +1,5 @@
 # Json 2 Struct for golang
+[![Version info](https://img.shields.io/crates/v/json2struct.svg)](https://crates.io/crates/json2struct)
 
 Install:
 
