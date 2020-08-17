@@ -28,6 +28,7 @@ pub fn golang_parse(params: &Value, struct_name: &String) -> String {
     return res;
 }
 
+/// 对map类型的值进行处理
 fn is_object(params: &Value) -> (Vec<String>, String) {
     let mut fields: Vec<String> = vec![];
     let cur_map = params.as_object().unwrap();
@@ -50,17 +51,18 @@ fn is_object(params: &Value) -> (Vec<String>, String) {
             let field = format!("    {} {} `json:\"{}{}\"`", came_key, cur_type, key, OMITEMPTY);
             fields.push(field);
         }
-
     }
     return (fields, new_struct);
 }
 
+/// 对列表类型的数据进行处理
 fn is_array(params: &Value) -> &Value {
     let cur = params.as_array().unwrap();
     let val = cur.get(0).unwrap();
     return val;
 }
 
+/// 获取数据类型
 fn get_data_type(params: &Value, key: &String) -> String {
     if params.is_object() {
         let cur_type = format!("*{}", key.as_str().to_camel_case());
@@ -76,7 +78,11 @@ fn get_data_type(params: &Value, key: &String) -> String {
         return cur_type;
     } else if params.is_array() {
         let values = params.as_array().unwrap();
-        let first = values.get(0).unwrap();
+        let first = values.get(0).unwrap_or(&serde_json::Value::Null);
+        if first == &serde_json::Value::Null {
+            let cur_type = format!("[]{}", "interface{}");
+            return cur_type
+        }
         let cur = get_data_type(first, key);
         let cur_type = format!("[]{}", cur);
         return cur_type;
