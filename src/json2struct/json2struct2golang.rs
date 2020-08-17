@@ -44,7 +44,7 @@ fn is_object(params: &Value) -> (Vec<String>, String) {
         } else if val.is_array() {
             if cur_type.contains("*") {
                 let cur_val = is_array(val);
-                new_struct = golang_parse(cur_val, &came_key)
+                new_struct = new_struct + golang_parse(cur_val, &came_key).as_str()
             }
         }
         unsafe {
