@@ -44,12 +44,12 @@ fn is_object(params: &Value) -> (Vec<String>, String) {
         let came_key = key.as_str().to_camel_case();
         let mut cur_struct = String::new();
         if val.is_object() {
-            cur_struct = ok1(&cur_type, &came_key, val, ok)
+            cur_struct = is_ok(&cur_type, &came_key, val, ok)
 
         } else if val.is_array() {
             if cur_type.contains("*") {
                 let cur_val = is_array(val);
-                cur_struct = ok1(&cur_type, &came_key, cur_val, ok)
+                cur_struct = is_ok(&cur_type, &came_key, cur_val, ok)
             }
         }
         new_struct = new_struct + cur_struct.as_str();
@@ -61,7 +61,7 @@ fn is_object(params: &Value) -> (Vec<String>, String) {
     return (fields, new_struct);
 }
 
-fn ok1(cur_type: &String, came_key:&String, val: &Value, ok: bool) -> String {
+fn is_ok(cur_type: &String, came_key:&String, val: &Value, ok: bool) -> String {
     if ok {
         let next_key = cur_type.as_str().to_camel_case();
         let cur_struct = golang_parse(val, &next_key);
