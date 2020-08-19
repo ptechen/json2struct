@@ -41,6 +41,7 @@ fn is_object(params: &Value) -> (Vec<String>, String) {
         let data = get_data_type(val, key);
         let cur_type = data.0;
         let ok = data.1;
+        println!("{}", ok);
         let came_key = key.as_str().to_camel_case();
         let mut cur_struct = String::new();
         if val.is_object() {
@@ -49,6 +50,7 @@ fn is_object(params: &Value) -> (Vec<String>, String) {
         } else if val.is_array() {
             if cur_type.contains("*") {
                 let cur_val = is_array(val);
+
                 cur_struct = is_ok(&cur_type, &came_key, cur_val, ok)
             }
         }
@@ -106,6 +108,7 @@ fn get_data_type(params: &Value, key: &String) -> (String, bool) {
             return (cur_type, ok);
         }
         let cur = get_data_type(first, key);
+        ok = cur.1;
         let cur_type = format!("[]{}", cur.0);
         return (cur_type, ok);
     } else if params.is_f64() {
@@ -135,4 +138,8 @@ fn key_exists(mut key: String) -> (String, bool) {
         INDEX = 0;
     }
     return (key, ok);
+}
+
+fn regex_add(key: &String) {
+
 }
