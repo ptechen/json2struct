@@ -53,7 +53,6 @@ fn is_object(params: &Value) -> (Vec<String>, String) {
         let data = get_data_type(val, key);
         let cur_type = data.0;
         let ok = data.1;
-        println!("{}", ok);
         let came_key = key.as_str().to_camel_case();
         let mut cur_struct = String::new();
         if val.is_object() {
