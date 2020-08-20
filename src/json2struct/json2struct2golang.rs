@@ -1,11 +1,7 @@
 #[cfg(test)]
 mod tests {
-    use crate::json2struct::json2struct2golang::regex_add;
-
     #[test]
     fn it_works() {
-        let a = "test12";
-        regex_add(a)
     }
 }
 
@@ -13,7 +9,6 @@ extern crate heck;
 extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
-extern crate regex;
 
 use heck::CamelCase;
 use serde_json::{{Value}};
