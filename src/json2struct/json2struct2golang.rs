@@ -1,7 +1,19 @@
+#[cfg(test)]
+mod tests {
+    use crate::json2struct::json2struct2golang::regex_add;
+
+    #[test]
+    fn it_works() {
+        let a = "test12";
+        regex_add(a)
+    }
+}
+
 extern crate heck;
 extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
+extern crate regex;
 
 use heck::CamelCase;
 use serde_json::{{Value}};
@@ -86,7 +98,7 @@ fn get_data_type(params: &Value, key: &String) -> (String, bool) {
     let mut ok = false;
     if params.is_object() {
         let mut cur_key = key.to_string();
-        let res = key_exists(cur_key);
+        let res = key_exists(cur_key.clone(), cur_key.clone());
         cur_key = res.0;
         ok = res.1;
         let cur_type = format!("*{}", cur_key.as_str().to_camel_case());
@@ -123,23 +135,21 @@ fn get_data_type(params: &Value, key: &String) -> (String, bool) {
     }
 }
 
-fn key_exists(mut key: String) -> (String, bool) {
+fn key_exists(key: String, mut new_key: String) -> (String, bool) {
     let mut ok = false;
     unsafe {
         INDEX = INDEX + 1;
         let cur_key = format!("{}{}", key, INDEX);
-        if STRUCT_NAME.contains(&key) {
+        if STRUCT_NAME.contains(&new_key) {
             ok = true;
-            let cur_res = key_exists(cur_key);
-            key = cur_res.0;
+            let cur_res = key_exists(key, cur_key);
+            new_key = cur_res.0;
         } else {
-            STRUCT_NAME.push(key.clone())
+            STRUCT_NAME.push(new_key.clone())
         }
         INDEX = 0;
     }
-    return (key, ok);
+    return (new_key, ok);
 }
 
-fn regex_add(key: &String) {
 
-}
