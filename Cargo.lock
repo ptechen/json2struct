@@ -302,7 +302,6 @@ version = "0.1.4"
 dependencies = [
  "heck",
  "quicli",
- "regex",
  "serde",
  "serde_derive",
  "serde_json",
