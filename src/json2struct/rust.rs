@@ -1,10 +1,9 @@
 extern crate heck;
-extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 
-use heck::CamelCase;
-use serde_json::{{Value}};
+use heck::{CamelCase, SnakeCase};
+use serde_json::{Value};
 
 #[cfg(test)]
 mod tests {
@@ -12,29 +11,46 @@ mod tests {
     fn it_works() {}
 }
 
-static mut OMITEMPTY: &str = ",omitempty";
+static mut PUB: String = String::new();
 static mut STRUCT_NAME: Vec<String> = vec![];
 static mut INDEX: i8 = 0;
+static mut DERIVE: String = String::new();
+static mut CAMEL: String = String::new();
 
-pub fn set_omitempty_empty() {
+pub fn set_pub(public: String) {
     unsafe {
-        OMITEMPTY = "";
+        PUB = public;
     }
 }
 
-pub fn golang_parse(params: &Value, struct_name: &String) -> String {
-    let struct_header = format!("type {} struct {}", struct_name, "{");
-    let mut fields: Vec<String> = vec![];
-    let mut new_struct = String::new();
-    if params.is_object() {
-        let cur_res = is_object(params);
-        fields = cur_res.0;
-        fields.sort();
-        new_struct = cur_res.1;
+
+pub fn set_derive(derive: String) {
+    unsafe {
+        DERIVE = derive;
+    }
+}
+
+pub fn set_camel(camel:String) {
+    unsafe {
+        CAMEL = camel
+    }
+}
+
+pub fn rust_parse(params: &Value, struct_name: &String) -> String {
+    unsafe {
+        let struct_header = format!("{}\n{}\n{} struct {} {}", CAMEL, DERIVE, PUB, struct_name, "{");
+        let mut fields: Vec<String> = vec![];
+        let mut new_struct = String::new();
+        if params.is_object() {
+            let cur_res = is_object(params);
+            fields = cur_res.0;
+            fields.sort();
+            new_struct = cur_res.1;
+        }
+        let res = format!("{}\n{}\n{}\n{}", struct_header, fields.join("\n"), "}\n", new_struct);
+        return res;
     }
 
-    let res = format!("{}\n{}\n{}\n{}", struct_header, fields.join("\n"), "}\n", new_struct);
-    return res;
 }
 
 /// 对map类型的值进行处理
@@ -49,21 +65,24 @@ fn is_object(params: &Value) -> (Vec<String>, String) {
         let cur_type = data.0;
         let ok = data.1;
         let came_key = key.as_str().to_camel_case();
+        let snake_key = key;
         let mut cur_struct = String::new();
         if val.is_object() {
             if data.2 {
                 cur_struct = is_ok(&cur_type, &came_key, val, ok)
             }
         } else if val.is_array() {
-            if cur_type.contains("*") {
+            let cur = val.as_array().unwrap();
+            if cur.len() > 0 {
                 let cur_val = is_array(val);
-
+                println!("{:?}", &came_key);
                 cur_struct = is_ok(&cur_type, &came_key, cur_val, ok)
             }
+            println!("{:?}", &cur_struct);
         }
         new_struct = new_struct + cur_struct.as_str();
         unsafe {
-            let field = format!("    {} {} `json:\"{}{}\"`", came_key, cur_type, key, OMITEMPTY);
+            let field = format!("    {} {}: {},", PUB, snake_key, cur_type);
             fields.push(field);
         }
     }
@@ -73,10 +92,10 @@ fn is_object(params: &Value) -> (Vec<String>, String) {
 fn is_ok(cur_type: &String, came_key: &String, val: &Value, ok: bool) -> String {
     if ok {
         let next_key = cur_type.as_str().to_camel_case();
-        let cur_struct = golang_parse(val, &next_key);
+        let cur_struct = rust_parse(val, &next_key);
         return cur_struct;
     } else {
-        let cur_struct = golang_parse(val, came_key);
+        let cur_struct = rust_parse(val, came_key);
         return cur_struct;
     }
 }
@@ -97,18 +116,18 @@ fn get_data_type(params: &Value, key: &String) -> (String, bool, bool) {
         let res = key_exists(cur_key.clone(), cur_key.clone());
         cur_key = res.0;
         ok = res.1;
-        let mut cur_type = format!("*{}", cur_key.as_str().to_camel_case());
+        let mut cur_type = format!("{}", cur_key.as_str().to_camel_case());
         let flag_str = serde_json::to_string(params).unwrap();
         if flag_str == "{}" {
-            cur_type = String::from("map[string]interface{}");
+            cur_type = String::from("HashMap<String, Value>");
             flag = false
         }
         return (cur_type, ok, flag);
     } else if params.is_string() {
-        let cur_type = String::from("string");
+        let cur_type = String::from("String");
         return (cur_type, ok, flag);
     } else if params.is_i64() {
-        let cur_type = String::from("int");
+        let cur_type = String::from("i64");
         return (cur_type, ok, flag);
     } else if params.is_boolean() {
         let cur_type = String::from("bool");
@@ -117,22 +136,22 @@ fn get_data_type(params: &Value, key: &String) -> (String, bool, bool) {
         let values = params.as_array().unwrap();
         let first = values.get(0).unwrap_or(&serde_json::Value::Null);
         if first == &serde_json::Value::Null {
-            let cur_type = format!("[]{}", "interface{}");
+            let cur_type = format!("Vec<{}>", "Value");
             return (cur_type, ok, flag);
         }
         let cur = get_data_type(first, key);
         ok = cur.1;
         flag = cur.2;
-        let cur_type = format!("[]{}", cur.0);
+        let cur_type = format!("Vec<{}>", cur.0);
         return (cur_type, ok, flag);
     } else if params.is_f64() {
-        let cur_type = String::from("float64");
+        let cur_type = String::from("f64");
         return (cur_type, ok, flag);
     } else if params.is_u64() {
-        let cur_type = String::from("uint");
+        let cur_type = String::from("u64");
         return (cur_type, ok, flag);
     } else {
-        let cur_type = String::from("interface{}");
+        let cur_type = String::from("Value");
         return (cur_type, ok, flag);
     }
 }
@@ -153,5 +172,3 @@ fn key_exists(key: String, mut new_key: String) -> (String, bool) {
     }
     return (new_key, ok);
 }
-
-

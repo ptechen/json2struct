@@ -1,6 +1,6 @@
 [package]
 name = "json2struct"
-version = "0.1.5"
+version = "0.1.6"
 authors = ["petechen <15736755067@163.com>"]
 edition = "2018"
 homepage = "https://github.com/ptechen"
@@ -14,7 +14,6 @@ description = "Json 2 struct for golang"
 [dependencies]
 quicli = "0.4.0"
 structopt = "0.3.15"
-serde = "1.0.115"
 serde_derive = "1.0.115"
 serde_json = "1.0.57"
 heck = "0.3.1"
