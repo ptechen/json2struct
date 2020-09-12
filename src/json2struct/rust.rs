@@ -2,7 +2,7 @@ extern crate heck;
 extern crate serde_derive;
 extern crate serde_json;
 
-use heck::{CamelCase, SnakeCase};
+use heck::{CamelCase};
 use serde_json::{Value};
 
 #[cfg(test)]
